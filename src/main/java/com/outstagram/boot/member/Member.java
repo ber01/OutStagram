@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Builder
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
+@ToString @EqualsAndHashCode(of = "id")
 @Document
 public class Member {
 
