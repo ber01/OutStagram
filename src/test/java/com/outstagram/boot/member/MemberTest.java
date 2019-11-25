@@ -1,6 +1,7 @@
 package com.outstagram.boot.member;
 
 import jdk.jfr.Description;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest
 class MemberTest {
@@ -54,11 +56,20 @@ class MemberTest {
     @Test
     @Description("하나의 Member 객체를 저장 후 불러오는 테스트")
     public void save_read_test() {
+        String email = "email@email.com";
+
         Mono.just(Member.builder()
                 .id(UUID.randomUUID().toString())
-                .email("email@email.com")
+                .email(email)
                 .password("testPasswordPassword")
                 .createdAt(LocalDateTime.now())
                 .build()).flatMap(memberRepository::save).subscribe();
+
+        Mono<Member> byEmail = memberRepository.findByEmail(email);
+        Member member = byEmail.block();
+
+        log.info(String.valueOf(member));
+
+        assertThat(member != null ? member.getEmail() : null).isEqualTo(email);
     }
 }
