@@ -25,7 +25,19 @@ public class DummyData implements CommandLineRunner {
                                     .username("testuser")
                                     .password("pass")
                                     .createdAt(LocalDateTime.now())
-                                    .build()
+                                    .build(),
+                                Member.builder()
+                                        .email("test2@email.com")
+                                        .username("testuser2")
+                                        .password("pass")
+                                        .createdAt(LocalDateTime.now())
+                                        .build(),
+                                Member.builder()
+                                        .email("test3@email.com")
+                                        .username("testuser3")
+                                        .password("pass")
+                                        .createdAt(LocalDateTime.now())
+                                        .build()
                         ).flatMap(memberRepository::save)
                 ).subscribe(System.out::println);
     }

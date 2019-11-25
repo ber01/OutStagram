@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,7 +25,6 @@ class MemberTest {
     @Test
     @Description("Member 객체 생성 테스트")
     public void init_test() {
-
         Member member = Member.builder()
                 .id(UUID.randomUUID().toString())
                 .email("test@test.com")
@@ -43,6 +44,21 @@ class MemberTest {
     @Description("데이터베이스 Read 테스트")
     public void read_member_data() {
         Flux<Member> flux = memberRepository.findAll();
-        System.out.println(flux);
+        Mono<List<Member>> listMono = flux.collectList();
+        List<Member> block = listMono.block();
+
+        System.out.println("1번 : " + listMono);
+        System.out.println("2번 : " + block);
+    }
+
+    @Test
+    @Description("하나의 Member 객체를 저장 후 불러오는 테스트")
+    public void save_read_test() {
+        Mono.just(Member.builder()
+                .id(UUID.randomUUID().toString())
+                .email("email@email.com")
+                .password("testPasswordPassword")
+                .createdAt(LocalDateTime.now())
+                .build()).flatMap(memberRepository::save).subscribe();
     }
 }
