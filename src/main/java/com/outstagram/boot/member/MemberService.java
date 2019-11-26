@@ -25,6 +25,10 @@ public class MemberService implements UserDetailsService {
         Mono<Member> memberMono = memberRepository.findByEmail(username);
         Member member = memberMono.block();
 
+        if (member == null) {
+            throw new UsernameNotFoundException(username);
+        }
+
         return new User(member.getEmail(), member.getPassword(), authorities(member.getRoles()));
     }
 
