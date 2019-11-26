@@ -49,8 +49,9 @@ class MemberTest {
         Mono<List<Member>> listMono = flux.collectList();
         List<Member> block = listMono.block();
 
-        System.out.println("1번 : " + listMono);
-        System.out.println("2번 : " + block);
+        log.info("findAll() : " + flux);
+        log.info("collectList() : " + listMono);
+        log.info("block() : " + block);
     }
 
     @Test
