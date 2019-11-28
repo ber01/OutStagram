@@ -1,5 +1,7 @@
 package com.outstagram.boot.common;
 
+import com.outstagram.boot.article.Article;
+import com.outstagram.boot.article.ArticleRepository;
 import com.outstagram.boot.member.Member;
 import com.outstagram.boot.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +10,8 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 @Component
 @RequiredArgsConstructor
@@ -15,18 +19,47 @@ public class DummyData implements CommandLineRunner {
 
     private final MemberRepository memberRepository;
 
+    private final ArticleRepository articleRepository;
+
     @Override
     public void run(String... args) throws Exception {
         memberRepository.deleteAll()
                 .thenMany(
                         Flux.just(
                                 Member.builder()
-                                    .email("test@email.com")
-                                    .username("testuser")
+                                    .email("test1@emailcom")
+                                    .username("test1")
                                     .password("pass")
                                     .createdAt(LocalDateTime.now())
-                                    .build()
+                                .build(),
+                                Member.builder()
+                                    .email("test2@emailcom")
+                                    .username("test2")
+                                    .password("pass")
+                                    .createdAt(LocalDateTime.now())
+                                .build(),
+                                Member.builder()
+                                    .email("test3@emailcom")
+                                    .username("test3")
+                                    .password("pass")
+                                    .createdAt(LocalDateTime.now())
+                                .build()
                         ).flatMap(memberRepository::save)
-                ).subscribe(System.out::println);
+                ).subscribe();
+
+        articleRepository.deleteAll()
+                .thenMany(
+                        Flux.fromStream(
+                                Stream.generate( () ->
+                                        Article.builder()
+                                                .id(UUID.randomUUID().toString())
+                                                .title("test")
+                                                .body("testBody")
+                                                .createdAt(LocalDateTime.now())
+                                                .description("test111")
+                                                .build()
+                                ).limit(3L)
+                        ).flatMap(articleRepository::save)
+                ).subscribe();
     }
 }
