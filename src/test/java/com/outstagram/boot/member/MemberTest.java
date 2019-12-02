@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -23,6 +24,12 @@ class MemberTest {
 
     @Autowired
     MemberRepository memberRepository;
+
+    @Autowired
+    MemberService memberService;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     @Test
     @Description("Member 객체 생성 테스트")
@@ -58,19 +65,23 @@ class MemberTest {
     @Description("하나의 Member 객체를 저장 후 불러오는 테스트")
     public void save_read_test() {
         String email = "email@email.com";
+        String password = "testPasswordPassword";
 
         Mono.just(Member.builder()
                 .id(UUID.randomUUID().toString())
                 .email(email)
-                .password("testPasswordPassword")
+                .password(password)
                 .createdAt(LocalDateTime.now())
-                .build()).flatMap(memberRepository::save).subscribe();
+                .build()).flatMap(memberService::saveMember).subscribe();
 
         Mono<Member> byEmail = memberRepository.findByEmail(email);
         Member member = byEmail.block();
 
         log.info(String.valueOf(member));
 
-        assertThat(member != null ? member.getEmail() : null).isEqualTo(email);
+        if (member != null) {
+            assertThat(member.getEmail()).isEqualTo(email);
+            assertThat(this.passwordEncoder.matches(password, member.getPassword())).isTrue();
+        }
     }
 }
