@@ -2,18 +2,22 @@ package com.outstagram.boot.common;
 
 import com.outstagram.boot.member.Member;
 import com.outstagram.boot.member.MemberRepository;
+import com.outstagram.boot.member.MemberRole;
+import com.outstagram.boot.member.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
 public class DummyData implements CommandLineRunner {
 
     private final MemberRepository memberRepository;
+    private final MemberService memberService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -21,24 +25,27 @@ public class DummyData implements CommandLineRunner {
                 .thenMany(
                         Flux.just(
                                 Member.builder()
-                                    .email("test@email.com")
-                                    .username("testuser")
-                                    .password("pass")
-                                    .createdAt(LocalDateTime.now())
-                                    .build(),
+                                        .email("test@email.com")
+                                        .username("testuser")
+                                        .password("pass")
+                                        .createdAt(LocalDateTime.now())
+                                        .roles(Set.of(MemberRole.ADMIN, MemberRole.USER))
+                                        .build(),
                                 Member.builder()
                                         .email("test2@email.com")
                                         .username("testuser2")
                                         .password("pass")
                                         .createdAt(LocalDateTime.now())
+                                        .roles(Set.of(MemberRole.ADMIN, MemberRole.USER))
                                         .build(),
                                 Member.builder()
                                         .email("test3@email.com")
                                         .username("testuser3")
                                         .password("pass")
                                         .createdAt(LocalDateTime.now())
+                                        .roles(Set.of(MemberRole.ADMIN, MemberRole.USER))
                                         .build()
-                        ).flatMap(memberRepository::save)
+                        ).flatMap(memberService::saveMember)
                 ).subscribe(System.out::println);
     }
 }
