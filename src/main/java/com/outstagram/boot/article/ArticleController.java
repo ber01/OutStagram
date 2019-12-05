@@ -1,6 +1,7 @@
 package com.outstagram.boot.article;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -23,7 +24,9 @@ public class ArticleController {
     }
 
     @GetMapping("/{id}")
-    public Mono<Article> getArticleById(@PathVariable String id) {
+    public Mono<ResponseEntity<Article>> getArticleById(@PathVariable(value = "id") String id) {
         return articleService.getArticleById(id);
     }
+
+
 }

@@ -1,5 +1,7 @@
 package com.outstagram.boot.article;
 
+import org.assertj.core.api.Assertions;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
@@ -29,7 +32,15 @@ public class ArticleControllerTest {
     @Autowired
     ArticleRepository articleRepository;
 
+    @Autowired
+    ArticleService articleService;
+
     final String url = "/api/articles";
+
+    @Before
+    public void setUp() {
+        this.articleRepository.deleteAll();
+    }
 
     @Test
     @Description("정상적으로 게시글 생성하는 테스트")
@@ -81,8 +92,11 @@ public class ArticleControllerTest {
         IntStream.range(0, 30).forEach(this::generateArticle);
 
         webTestClient.get().uri(url)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(Article.class);
     }
 
     private Mono<Article> generateArticle(int index) {
@@ -103,9 +117,13 @@ public class ArticleControllerTest {
                 .image("/url")
                 .favoritesCount(0)
                 .build();
+        articleService.create(article);
 
         webTestClient.get().uri(url + "/" + article.getId())
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isOk()
+                .expectBody();
     }
+
+
 }

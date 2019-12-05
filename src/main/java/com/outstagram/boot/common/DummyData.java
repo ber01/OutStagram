@@ -51,15 +51,22 @@ public class DummyData implements CommandLineRunner {
                 .thenMany(
                         Flux.fromStream(
                                 Stream.generate( () ->
-                                        Article.builder()
-                                                .id(UUID.randomUUID().toString())
-                                                .title("test")
-                                                .body("testBody")
-                                                .createdAt(LocalDateTime.now())
-                                                .description("test111")
-                                                .build()
-                                ).limit(3L)
+                                        create()
+                                ).limit(30L)
                         ).flatMap(articleRepository::save)
                 ).subscribe();
+    }
+
+    private Article create() {
+        return Article.builder()
+                .id(UUID.randomUUID().toString())
+                .slug("test")
+                .title("test")
+                .description("It is test")
+                .body("test body")
+                .createdAt(LocalDateTime.now())
+                .image("/url")
+                .favoritesCount(0)
+                .build();
     }
 }
