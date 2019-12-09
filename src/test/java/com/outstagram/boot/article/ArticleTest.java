@@ -43,8 +43,8 @@ import static org.assertj.core.api.Assertions.assertThat;
     @Description("데이터베이스 Read 테스트")
     public void read_article_data() {
         String title = "test";
-        Flux<Article> flux = articleRepository.findByTitle(title);
-        List<Article> articles = flux.collectList().block();
+        Mono<Article> mono = articleRepository.findByTitle(title);
+        Article articles = mono.block();
 
         System.out.println(articles);
 
