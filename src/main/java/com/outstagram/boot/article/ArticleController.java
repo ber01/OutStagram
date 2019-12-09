@@ -32,4 +32,5 @@ public class ArticleController {
     public Mono<ResponseEntity<Article>> updateArticle(@PathVariable(value = "id") String id, @RequestBody Article article) {
         return articleService.updateArticle(id, article);
     }
+
 }

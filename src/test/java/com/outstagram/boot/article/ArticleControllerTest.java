@@ -135,6 +135,7 @@ public class ArticleControllerTest {
                 .image("/url")
                 .favoritesCount(0)
                 .build();
+        articleService.create(article);
 
         webTestClient.post().uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -162,4 +163,6 @@ public class ArticleControllerTest {
                 .assertNext(i -> assertThat(i.getTitle()).isEqualTo(updatedTitle))
                 .verifyComplete();
     }
+
+
 }
