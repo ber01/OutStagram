@@ -60,10 +60,8 @@ public class DummyData implements CommandLineRunner {
     private Article create() {
         return Article.builder()
                 .id(UUID.randomUUID().toString())
-                .slug("test")
                 .title("test")
                 .description("It is test")
-                .body("test body")
                 .createdAt(LocalDateTime.now())
                 .image("/url")
                 .favoritesCount(0)

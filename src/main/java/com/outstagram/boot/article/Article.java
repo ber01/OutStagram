@@ -20,13 +20,9 @@ public class Article {
 
     private String image;
 
-    private String slug;
-
     private String title;
 
     private String description;
-
-    private String body;
 
     private List<String> tagList;
 

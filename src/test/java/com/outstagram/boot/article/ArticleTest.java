@@ -28,9 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         Article article = Article.builder()
                 .id(UUID.randomUUID().toString())
                 .title("test")
-                .slug("test")
                 .description("testDes")
-                .body("testBody")
                 .createdAt(LocalDateTime.now())
                 .build();
 
