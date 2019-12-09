@@ -24,9 +24,12 @@ public class ArticleController {
     }
 
     @GetMapping("/{id}")
-    public Mono<ResponseEntity<Article>> getArticleById(@PathVariable(value = "id") String id) {
+    public Mono<Article> getArticleById(@PathVariable(value = "id") String id) {
         return articleService.getArticleById(id);
     }
 
-
+    @PutMapping("/{id}")
+    public Mono<ResponseEntity<Article>> updateArticle(@PathVariable(value = "id") String id, @RequestBody Article article) {
+        return articleService.updateArticle(id, article);
+    }
 }

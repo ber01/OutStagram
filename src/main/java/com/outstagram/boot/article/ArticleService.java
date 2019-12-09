@@ -21,11 +21,17 @@ public class ArticleService {
         return articleRepository.findAll();
     }
 
-    public Mono<ResponseEntity<Article>> getArticleById(String id) {
-        return articleRepository.findById(id)
-                .map(savedArticle -> ResponseEntity.ok(savedArticle))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Mono<Article> getArticleById(String id) {
+        return articleRepository.findById(id);
     }
 
-
+    public Mono<ResponseEntity<Article>> updateArticle(String id, Article article) {
+        return articleRepository.findById(id)
+                .flatMap(existingArticle -> {
+                    existingArticle.setTitle(article.getTitle());
+                    return articleRepository.save(existingArticle);
+                })
+                .map(updatedArticle -> new ResponseEntity<>(updatedArticle, HttpStatus.OK))
+                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
 }
