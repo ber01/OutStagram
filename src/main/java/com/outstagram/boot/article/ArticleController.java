@@ -33,4 +33,8 @@ public class ArticleController {
         return articleService.updateArticle(id, article);
     }
 
+    @DeleteMapping("/{id}")
+    public Mono<ResponseEntity<Void>> deleteArticle(@PathVariable(value = "id") String id) {
+        return articleService.deleteArticle(id);
+    }
 }

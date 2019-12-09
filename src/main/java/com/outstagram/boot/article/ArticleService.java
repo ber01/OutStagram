@@ -34,4 +34,13 @@ public class ArticleService {
                 .map(updatedArticle -> new ResponseEntity<>(updatedArticle, HttpStatus.OK))
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
+    public Mono<ResponseEntity<Void>> deleteArticle(String id) {
+        return articleRepository.findById(id)
+                .flatMap(existingArticle ->
+                    articleRepository.delete(existingArticle)
+                            .then(Mono.just(new ResponseEntity<Void>(HttpStatus.OK)))
+                )
+                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
 }

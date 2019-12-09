@@ -135,7 +135,6 @@ public class ArticleControllerTest {
                 .image("/url")
                 .favoritesCount(0)
                 .build();
-        articleService.create(article);
 
         webTestClient.post().uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -164,5 +163,31 @@ public class ArticleControllerTest {
                 .verifyComplete();
     }
 
+    @Test
+    @Description("정상적으로 게시물을 삭제하는 테스트")
+    public void deleteArticle() {
+        Article article = Article.builder()
+                .id(UUID.randomUUID().toString())
+                .slug("test")
+                .title("test")
+                .description("It is test")
+                .body("test body")
+                .createdAt(LocalDateTime.now())
+                .image("/url")
+                .favoritesCount(0)
+                .build();
 
+        webTestClient.post().uri(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(Mono.just(article), Article.class)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        webTestClient.delete().uri(url + "/" + article.getId())
+                .exchange()
+                .expectStatus().isOk();
+    }
 }
