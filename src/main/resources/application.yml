@@ -4,3 +4,8 @@ spring:
       host: localhost
       port: 27017
       database: outstagram
+my-app:
+  client-id: myApp
+  client-secret: pass
+  test-username: authTest@test.com
+  test-password: authPassword

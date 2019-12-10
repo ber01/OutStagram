@@ -1,5 +1,6 @@
 package com.outstagram.boot.member;
 
+import com.outstagram.boot.common.AppProperties;
 import jdk.jfr.Description;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +33,9 @@ public class MemberControllerTest {
     @Autowired
     private MemberService memberService;
 
+    @Autowired
+    private AppProperties appProperties;
+
     private final static String BEARER = "BEARER ";
 
     @Test
@@ -55,8 +59,8 @@ public class MemberControllerTest {
     }
 
     private String getAccessToken() {
-        String email = "authTest@test.com";
-        String password = "authPassword";
+        String email = appProperties.getTestUsername();
+        String password = appProperties.getTestPassword();
 
         Mono.just(Member.builder()
                 .email(email)
@@ -66,31 +70,28 @@ public class MemberControllerTest {
                 .roles(Set.of(MemberRole.ADMIN, MemberRole.USER))
                 .build()).flatMap(memberService::saveMember).subscribe();
 
-        String clientId = "myApp";
-        String clientSecret = "pass";
-
         MultiValueMap<String, String> fromData = new LinkedMultiValueMap<>();
         fromData.add("username", email);
         fromData.add("password", password);
         fromData.add("grant_type", "password");
 
-        FluxExchangeResult<String> result = webTestClient.mutate().filter(basicAuthentication(clientId, clientSecret)).build()
+        FluxExchangeResult<String> result = webTestClient
+                .mutate().filter(basicAuthentication(appProperties.getClientId(), appProperties.getClientSecret())).build()
                 .post()
-                .uri("/oauth/token")
-                .body(BodyInserters.fromFormData(fromData))
-                .exchange().returnResult(String.class);
+                    .uri("/oauth/token")
+                    .body(BodyInserters.fromFormData(fromData))
+                .exchange()
+                    .returnResult(String.class);
 
         System.out.println(result);
 
         String resultS = result.toString();
         int start = resultS.indexOf("{");
         int end = resultS.indexOf("}");
-
         String content = resultS.substring(start, end + 1);
 
         Jackson2JsonParser parser = new Jackson2JsonParser();
-
-        return BEARER + " " + parser.parseMap(content).get("access_token").toString();
+        return BEARER + parser.parseMap(content).get("access_token").toString();
 
         /*
         ResultActions perform = this.mockMvc.perform(post("/oauth/token")

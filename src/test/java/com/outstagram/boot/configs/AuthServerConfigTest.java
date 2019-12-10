@@ -1,5 +1,6 @@
 package com.outstagram.boot.configs;
 
+import com.outstagram.boot.common.AppProperties;
 import com.outstagram.boot.member.Member;
 import com.outstagram.boot.member.MemberRole;
 import com.outstagram.boot.member.MemberService;
@@ -9,29 +10,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunctions;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
 
 @Slf4j
@@ -46,11 +35,14 @@ public class AuthServerConfigTest {
     @Autowired
     WebTestClient webTestClient;
 
+    @Autowired
+    AppProperties appProperties;
+
     @Test
     @Description("인증 토큰을 발급 받는 테스트")
     public void getAuthToken() throws Exception {
-        String email = "authTest@test.com";
-        String password = "authPassword";
+        String email = appProperties.getTestUsername();
+        String password = appProperties.getTestPassword();
 
         Mono.just(Member.builder()
                 .email(email)
@@ -60,22 +52,19 @@ public class AuthServerConfigTest {
                 .roles(Set.of(MemberRole.ADMIN, MemberRole.USER))
                 .build()).flatMap(memberService::saveMember).subscribe();
 
-        String clientId = "myApp";
-        String clientSecret = "pass";
-
         MultiValueMap<String, String> fromData = new LinkedMultiValueMap<>();
         fromData.add("username", email);
         fromData.add("password", password);
         fromData.add("grant_type", "password");
 
         webTestClient
-                .mutate().filter(basicAuthentication(clientId, clientSecret)).build()
+                .mutate().filter(basicAuthentication(appProperties.getClientId(), appProperties.getClientSecret())).build()
                 .post()
                     .uri("/oauth/token")
                     .body(BodyInserters.fromFormData(fromData))
                 .exchange()
-                .expectStatus().isOk()
-                .expectBody().jsonPath("access_token").exists()
+                    .expectStatus().isOk()
+                    .expectBody().jsonPath("access_token").exists()
         ;
 
         /*
