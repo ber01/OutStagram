@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.validation.Valid;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/articles")
@@ -14,8 +16,8 @@ public class ArticleController {
     private final ArticleService articleService;
 
     @PostMapping
-    public Mono<Article> createArticle(@RequestBody Article article) {
-        return articleService.create(article);
+    public Mono<Article> createArticle(@RequestBody @Valid ArticleDto articleDto) {
+        return articleService.create(articleDto);
     }
 
     @GetMapping

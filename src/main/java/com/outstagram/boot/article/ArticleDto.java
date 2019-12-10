@@ -2,13 +2,14 @@ package com.outstagram.boot.article;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-@Builder @AllArgsConstructor @NoArgsConstructor
+@Data @Builder @AllArgsConstructor @NoArgsConstructor
 public class ArticleDto {
 
     @NotNull
@@ -23,7 +24,6 @@ public class ArticleDto {
     @NotNull
     private LocalDateTime createdAt;
 
-    @NotNull
     private LocalDateTime updatedAt;
 
     @Min(0)

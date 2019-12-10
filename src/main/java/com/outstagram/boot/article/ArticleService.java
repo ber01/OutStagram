@@ -1,6 +1,7 @@
 package com.outstagram.boot.article;
 
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,10 @@ public class ArticleService {
 
     private final ArticleRepository articleRepository;
 
-    public Mono<Article> create(Article article) {
+    private final ModelMapper modelMapper;
+
+    public Mono<Article> create(ArticleDto articleDto) {
+        Article article = modelMapper.map(articleDto, Article.class);
         return articleRepository.save(article);
     }
 
