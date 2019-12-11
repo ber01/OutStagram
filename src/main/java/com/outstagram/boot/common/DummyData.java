@@ -18,6 +18,7 @@ public class DummyData implements CommandLineRunner {
 
     private final MemberRepository memberRepository;
     private final MemberService memberService;
+    private final AppProperties appProperties;
 
     @Override
     public void run(String... args) throws Exception {
@@ -36,12 +37,20 @@ public class DummyData implements CommandLineRunner {
                                         .username("testuser2")
                                         .password("pass")
                                         .createdAt(LocalDateTime.now())
-                                        .roles(Set.of(MemberRole.ADMIN, MemberRole.USER))
+                                        .roles(Set.of(MemberRole.USER))
                                         .build(),
                                 Member.builder()
                                         .email("test3@email.com")
                                         .username("testuser3")
                                         .password("pass")
+                                        .createdAt(LocalDateTime.now())
+                                        .roles(Set.of(MemberRole.ADMIN))
+                                        .build(),
+                                // 테스트 용 더미 회원
+                                Member.builder()
+                                        .email(appProperties.getTestUsername())
+                                        .username("authTest")
+                                        .password(appProperties.getTestPassword())
                                         .createdAt(LocalDateTime.now())
                                         .roles(Set.of(MemberRole.ADMIN, MemberRole.USER))
                                         .build()

@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,7 +15,10 @@ public class MemberController {
     private final MemberRepository memberRepository;
 
     @GetMapping
-    public Flux<Member> getMembers() {
+    public Flux<Member> getMembers(@CurrentMember Member member) {
+        if (member != null) {
+            System.out.println(member.getId());
+        }
         return memberRepository.findAll();
     }
 

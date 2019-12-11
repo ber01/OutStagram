@@ -15,10 +15,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
-import reactor.core.publisher.Mono;
-
-import java.time.LocalDateTime;
-import java.util.Set;
 
 import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
 
@@ -31,18 +27,26 @@ public class MemberControllerTest {
     private WebTestClient webTestClient;
 
     @Autowired
-    private MemberService memberService;
-
-    @Autowired
     private AppProperties appProperties;
 
     private final static String BEARER = "BEARER ";
 
     @Test
     @Description("회원 전체를 불러오는 테스트")
-    public void findMemberAll() {
+    public void findAllMembers() {
         webTestClient.get()
                 .uri("/api/members")
+                .exchange()
+                .expectStatus().isOk()
+        ;
+    }
+
+    @Test
+    @Description("회원 전체를 불러오는 테스트 with 인증")
+    public void findAllMembersWithAuthentication() {
+        webTestClient.get()
+                .uri("/api/members")
+                .header(HttpHeaders.AUTHORIZATION, getAccessToken())
                 .exchange()
                 .expectStatus().isOk()
         ;
@@ -59,20 +63,9 @@ public class MemberControllerTest {
     }
 
     private String getAccessToken() {
-        String email = appProperties.getTestUsername();
-        String password = appProperties.getTestPassword();
-
-        Mono.just(Member.builder()
-                .email(email)
-                .username("authTest")
-                .password(password)
-                .createdAt(LocalDateTime.now())
-                .roles(Set.of(MemberRole.ADMIN, MemberRole.USER))
-                .build()).flatMap(memberService::saveMember).subscribe();
-
         MultiValueMap<String, String> fromData = new LinkedMultiValueMap<>();
-        fromData.add("username", email);
-        fromData.add("password", password);
+        fromData.add("username", appProperties.getTestUsername());
+        fromData.add("password", appProperties.getTestPassword());
         fromData.add("grant_type", "password");
 
         FluxExchangeResult<String> result = webTestClient
