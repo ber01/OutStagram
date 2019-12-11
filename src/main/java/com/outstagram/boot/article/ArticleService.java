@@ -17,7 +17,7 @@ public class ArticleService {
     private final ModelMapper modelMapper;
 
     public Mono<Article> create(ArticleDto articleDto) {
-        Article article = modelMapper.map(articleDto, Article.class);
+        Article article = this.modelMapper.map(articleDto, Article.class);
         return articleRepository.save(article);
     }
 

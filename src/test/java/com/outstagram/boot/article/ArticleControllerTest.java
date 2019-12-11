@@ -55,23 +55,21 @@ public class ArticleControllerTest {
                 .favoritesCount(0)
                 .build();
 
-        Article article = this.modelMapper.map(articleDto, Article.class);
-
         webTestClient.post().uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .body(Mono.just(article), Article.class)
+                .body(Mono.just(articleDto), Article.class)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.id").isNotEmpty();
 
-//        Mono<Article> articleMono = articleRepository.findById(article.getId());
-//
-//        StepVerifier.create(articleMono)
-//                .assertNext(i -> assertThat(article).isNotNull())
-//                .verifyComplete();
+        Mono<Article> articleMono = this.articleRepository.save(this.modelMapper.map(articleDto, Article.class));
+
+        StepVerifier.create(articleMono)
+                .assertNext(i -> assertThat(articleDto).isNotNull())
+                .verifyComplete();
     }
 
     private Article create(int index) {
@@ -160,6 +158,7 @@ public class ArticleControllerTest {
         String updatedTitle = "Update Test";
         Article updatedArticle = new Article();
         updatedArticle.setTitle(updatedTitle);
+        updatedArticle.setUpdatedAt(LocalDateTime.now());
 
         webTestClient.put().uri(url + "/" + article.getId())
                 .contentType(MediaType.APPLICATION_JSON)
