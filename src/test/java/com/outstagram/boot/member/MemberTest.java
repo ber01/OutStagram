@@ -1,18 +1,23 @@
 package com.outstagram.boot.member;
 
 import jdk.jfr.Description;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest
 class MemberTest {
@@ -20,10 +25,15 @@ class MemberTest {
     @Autowired
     MemberRepository memberRepository;
 
+    @Autowired
+    MemberService memberService;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
     @Test
     @Description("Member 객체 생성 테스트")
     public void init_test() {
-
         Member member = Member.builder()
                 .id(UUID.randomUUID().toString())
                 .email("test@test.com")
@@ -43,6 +53,35 @@ class MemberTest {
     @Description("데이터베이스 Read 테스트")
     public void read_member_data() {
         Flux<Member> flux = memberRepository.findAll();
-        System.out.println(flux);
+        Mono<List<Member>> listMono = flux.collectList();
+        List<Member> block = listMono.block();
+
+        log.info("findAll() : " + flux);
+        log.info("collectList() : " + listMono);
+        log.info("block() : " + block);
+    }
+
+    @Test
+    @Description("하나의 Member 객체를 저장 후 불러오는 테스트")
+    public void save_read_test() {
+        String email = "email@email.com";
+        String password = "testPasswordPassword";
+
+        Mono.just(Member.builder()
+                .id(UUID.randomUUID().toString())
+                .email(email)
+                .password(password)
+                .createdAt(LocalDateTime.now())
+                .build()).flatMap(memberService::saveMember).subscribe();
+
+        Mono<Member> byEmail = memberRepository.findByEmail(email);
+        Member member = byEmail.block();
+
+        log.info(String.valueOf(member));
+
+        if (member != null) {
+            assertThat(member.getEmail()).isEqualTo(email);
+            assertThat(this.passwordEncoder.matches(password, member.getPassword())).isTrue();
+        }
     }
 }
