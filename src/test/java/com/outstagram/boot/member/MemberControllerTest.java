@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.FluxExchangeResult;
@@ -15,6 +16,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
+import reactor.core.publisher.Mono;
 
 import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
 
@@ -55,10 +57,30 @@ public class MemberControllerTest {
     @Test
     @Description("정상적으로 회원가입이 성공하는 테스트")
     public void createMember() {
-        webTestClient.post()
-                .uri("/api/members")
+        String email = "khmin@gmail.com";
+        String username = "minkh";
+
+        Member member = Member.builder()
+                .email(email)
+                .username(username)
+                .password("password")
+                .build();
+
+        webTestClient
+                .post().uri("/api/members")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(Mono.just(member), Member.class)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus()
+                    .isOk()
+                .expectHeader()
+                    .contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                    .jsonPath("id").exists()
+                    .jsonPath("email").isEqualTo(email)
+                    .jsonPath("username").isEqualTo(username)
+        ;
     }
 
     private String getAccessToken() {
@@ -69,11 +91,10 @@ public class MemberControllerTest {
 
         FluxExchangeResult<String> result = webTestClient
                 .mutate().filter(basicAuthentication(appProperties.getClientId(), appProperties.getClientSecret())).build()
-                .post()
-                    .uri("/oauth/token")
+                .post().uri("/oauth/token")
                     .body(BodyInserters.fromFormData(fromData))
                 .exchange()
-                    .returnResult(String.class);
+                .returnResult(String.class);
 
         System.out.println(result);
 
