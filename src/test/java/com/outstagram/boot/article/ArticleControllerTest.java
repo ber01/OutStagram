@@ -2,6 +2,7 @@ package com.outstagram.boot.article;
 
 import com.outstagram.boot.common.AppProperties;
 import com.outstagram.boot.member.Member;
+import com.outstagram.boot.member.MemberRepository;
 import com.outstagram.boot.member.MemberRole;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,6 +41,9 @@ public class ArticleControllerTest {
 
     @Autowired
     ArticleRepository articleRepository;
+
+    @Autowired
+    MemberRepository memberRepository;
 
     @Autowired
     ArticleService articleService;
@@ -134,6 +138,59 @@ public class ArticleControllerTest {
                 .expectStatus().isBadRequest()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
+    }
+
+    @Test
+    @Description("좋아요 기능을 누른 경우")
+    public void favoriteArticle() {
+        Article article = Article.builder()
+                .id(UUID.randomUUID().toString())
+                .title("test")
+                .description("It is test")
+                .createdAt(LocalDateTime.now())
+                .image("/url")
+                .favoritesCount(0)
+                .build();
+
+        Member member = createMember();
+        webTestClient.post()
+                .uri("/api/members")
+                .header(HttpHeaders.AUTHORIZATION, getAccessToken())
+                .body(Mono.just(member), Member.class)
+                .exchange()
+                .expectStatus().isOk();
+        article.setMemberId(member.getId());
+        Member savedMember = memberRepository.findByEmail(member.getEmail()).block();
+
+        webTestClient.post().uri(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getAccessToken())
+                .body(Mono.just(article), Article.class)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        webTestClient.post().uri(url + "/" + article.getId() + "/favorite")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getAccessToken())
+                .body(Mono.just(article), Article.class)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("favoritesCount").exists()
+                .jsonPath("favoritedMemberId").exists();
+
+        Mono<Article> articleMono = articleRepository.findById(article.getId());
+
+        StepVerifier.create(articleMono)
+                .assertNext(art -> {
+                    art.getFavoritesCount().equals(1);
+                    art.getFavoritedMemberId().contains(savedMember.getId());
+                })
+                .verifyComplete();
     }
 
     @Test

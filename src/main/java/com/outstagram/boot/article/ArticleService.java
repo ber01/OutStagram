@@ -50,4 +50,8 @@ public class ArticleService {
                 )
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
+    public Article findArticle(String id) {
+        return articleRepository.findById(id).block();
+    }
 }

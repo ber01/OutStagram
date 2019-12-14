@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Builder @Getter @Setter
 @NoArgsConstructor
@@ -39,10 +40,10 @@ public class Article {
 
     private LocalDateTime updatedAt;
 
-    private boolean favorited;
-
     @Min(0)
     private Integer favoritesCount;
+
+    private Set<String> favoritedMemberId;
 
     private String memberId;
 }

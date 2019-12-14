@@ -9,6 +9,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.util.Collections;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,6 +21,17 @@ public class ArticleController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<Article> createArticle(@RequestBody @Valid Article article, @CurrentMember String memberId) {
+        return articleService.create(article, memberId);
+    }
+
+    @PostMapping("/{id}/favorite")
+    public Mono<Article> favoriteArticle(@PathVariable(value = "id") String id, @CurrentMember String memberId) {
+        Article article = articleService.findArticle(id);
+        article.setFavoritesCount(article.getFavoritesCount() + 1);
+        article.setFavoritedMemberId(Collections.singleton(memberId));
+        if (article.getFavoritedMemberId().contains(memberId)) {
+            article.setFavoritesCount(article.getFavoritesCount() - 1);
+        }
         return articleService.create(article, memberId);
     }
 
