@@ -8,4 +8,4 @@ my-app:
   client-id: myApp
   client-secret: pass
   test-username: authTest@test.com
-  test-password: authPassword
+  test-password: authPassword1!
