@@ -29,9 +29,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-hateoas'
 //    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    // https://mvnrepository.com/artifact/org.modelmapper/modelmapper
-    compile group: 'org.modelmapper', name: 'modelmapper', version: '2.3.5'
-    compileOnly 'org.projectlombok:lombok'
+    // https://mvnrepository.com/artifact/org.projectlombok/lombok
+    compile group: 'org.projectlombok', name: 'lombok', version: '1.18.10'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'

@@ -1,8 +1,9 @@
 package com.outstagram.boot.article;
 
+import com.outstagram.boot.member.CurrentMember;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -17,11 +18,9 @@ public class ArticleController {
     private final ArticleService articleService;
 
     @PostMapping
-    public Mono<Article> createArticle(@RequestBody @Valid ArticleDto articleDto, Errors errors) {
-        if (errors.hasErrors()) {
-            return Mono.error((Throwable) errors);
-        }
-        return articleService.create(articleDto);
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<Article> createArticle(@RequestBody @Valid Article article, @CurrentMember String memberId) {
+        return articleService.create(article, memberId);
     }
 
     @GetMapping
