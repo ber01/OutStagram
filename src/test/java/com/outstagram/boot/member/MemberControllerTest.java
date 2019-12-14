@@ -53,11 +53,10 @@ public class MemberControllerTest {
     }
 
     @Test
-    @Description("토큰 정보를 포함한 POST 테스트")
-    public void postMember() {
+    @Description("정상적으로 회원가입이 성공하는 테스트")
+    public void createMember() {
         webTestClient.post()
                 .uri("/api/members")
-                .header(HttpHeaders.AUTHORIZATION, getAccessToken())
                 .exchange()
                 .expectStatus().isOk();
     }
