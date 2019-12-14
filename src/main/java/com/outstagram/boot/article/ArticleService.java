@@ -45,8 +45,8 @@ public class ArticleService {
     public Mono<ResponseEntity<Void>> deleteArticle(String id) {
         return articleRepository.findById(id)
                 .flatMap(existingArticle ->
-                    articleRepository.delete(existingArticle)
-                            .then(Mono.just(new ResponseEntity<Void>(HttpStatus.OK)))
+                        articleRepository.delete(existingArticle)
+                                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.OK)))
                 )
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
