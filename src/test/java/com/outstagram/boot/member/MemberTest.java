@@ -56,9 +56,9 @@ class MemberTest {
         Mono<List<Member>> listMono = flux.collectList();
         List<Member> block = listMono.block();
 
-        log.info("findAll() : " + flux);
-        log.info("collectList() : " + listMono);
-        log.info("block() : " + block);
+//        log.info("findAll() : " + flux);
+//        log.info("collectList() : " + listMono);
+//        log.info("block() : " + block);
     }
 
     @Test
@@ -77,7 +77,7 @@ class MemberTest {
         Mono<Member> byEmail = memberRepository.findByEmail(email);
         Member member = byEmail.block();
 
-        log.info(String.valueOf(member));
+//        log.info(String.valueOf(member));
 
         if (member != null) {
             assertThat(member.getEmail()).isEqualTo(email);

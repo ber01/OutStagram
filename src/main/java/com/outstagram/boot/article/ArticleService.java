@@ -1,5 +1,7 @@
 package com.outstagram.boot.article;
 
+import com.outstagram.boot.member.Member;
+import com.outstagram.boot.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,13 +9,18 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
 
-    public Mono<Article> create(Article article) {
+    private final MemberRepository memberRepository;
+
+    public Mono<Article> create(Article article, String memberId) {
+        article.setMemberId(memberId);
         return articleRepository.save(article);
     }
 
