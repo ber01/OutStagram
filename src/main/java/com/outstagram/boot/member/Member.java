@@ -27,7 +27,7 @@ public class Member {
     private String username;
 
     @NotBlank
-    @Pattern(regexp = "(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}")
+    @Pattern(regexp = "^.*(?=^.{8,16}$)(?=.*\\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).*")
     private String password;
 
     private String image;

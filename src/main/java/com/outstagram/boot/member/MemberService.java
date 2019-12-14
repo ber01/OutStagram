@@ -1,6 +1,7 @@
 package com.outstagram.boot.member;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -36,9 +37,9 @@ public class MemberService implements UserDetailsService {
         return new MemberAdapter(member);
     }
 
-    public Mono<Member> createMember(Member member) {
+    public Mono<Member> save(Member member) {
         member.setPassword(this.passwordEncoder.encode(member.getPassword()));
         member.setRoles(Set.of(MemberRole.USER));
         return this.memberRepository.save(member);
-    }
+}
 }

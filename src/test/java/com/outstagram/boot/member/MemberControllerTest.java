@@ -128,6 +128,26 @@ public class MemberControllerTest {
         };
     }
 
+    @Test
+    @Description("이메일이 이미 존재하여 실패하는 테스트")
+    public void createMemberFailExistEmail() {
+        Member member = Member.builder()
+                .email(appProperties.getTestUsername())
+                .username("khmin")
+                .password(appProperties.getTestPassword())
+                .build();
+
+        webTestClient
+                .post().uri("/api/members")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(Mono.just(member), Member.class)
+                .exchange()
+                .expectStatus()
+                    .isBadRequest()
+        ;
+    }
+
     private String getAccessToken() {
         MultiValueMap<String, String> fromData = new LinkedMultiValueMap<>();
         fromData.add("username", appProperties.getTestUsername());
