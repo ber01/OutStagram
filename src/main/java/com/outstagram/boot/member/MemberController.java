@@ -1,10 +1,14 @@
 package com.outstagram.boot.member;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,7 +27,8 @@ public class MemberController {
     }
 
     @PostMapping
-    public Mono<Member> createMember(@RequestBody Member member) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<Member> createMember(@RequestBody @Valid Member member) {
         return memberService.createMember(member);
     }
 

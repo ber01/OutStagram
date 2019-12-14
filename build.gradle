@@ -45,6 +45,8 @@ dependencies {
     testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.2.1.RELEASE'
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-configuration-processor
     compile group: 'org.springframework.boot', name: 'spring-boot-configuration-processor', version: '2.2.2.RELEASE'
+    // https://mvnrepository.com/artifact/pl.pragmatists/JUnitParams
+    testCompile group: 'pl.pragmatists', name: 'JUnitParams', version: '1.1.1'
 }
 
 test {

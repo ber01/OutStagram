@@ -2,6 +2,10 @@ package com.outstagram.boot.member;
 
 import com.outstagram.boot.common.AppProperties;
 import jdk.jfr.Description;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit4.rules.SpringClassRule;
+import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.LinkedMultiValueMap;
@@ -20,10 +25,16 @@ import reactor.core.publisher.Mono;
 
 import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
 
-@RunWith(SpringRunner.class)
+@RunWith(JUnitParamsRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
 public class MemberControllerTest {
+
+    @ClassRule
+    public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+
+    @Rule
+    public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
     @Autowired
     private WebTestClient webTestClient;
@@ -32,6 +43,9 @@ public class MemberControllerTest {
     private AppProperties appProperties;
 
     private final static String BEARER = "BEARER ";
+    private final static String EMAIL = "minkh@gmail.com";
+    private final static String USERNAME = "khmin";
+    private final static String PASSWORD = "!Ab123456";
 
     @Test
     @Description("회원 전체를 불러오는 테스트")
@@ -46,24 +60,22 @@ public class MemberControllerTest {
     @Test
     @Description("회원 전체를 불러오는 테스트 with 인증")
     public void findAllMembersWithAuthentication() {
-        webTestClient.get()
-                .uri("/api/members")
-                .header(HttpHeaders.AUTHORIZATION, getAccessToken())
+        webTestClient
+                .get().uri("/api/members")
+                    .header(HttpHeaders.AUTHORIZATION, getAccessToken())
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus()
+                    .isOk()
         ;
     }
 
     @Test
     @Description("정상적으로 회원가입이 성공하는 테스트")
     public void createMember() {
-        String email = "khmin@gmail.com";
-        String username = "minkh";
-
         Member member = Member.builder()
-                .email(email)
-                .username(username)
-                .password("password")
+                .email(EMAIL)
+                .username(USERNAME)
+                .password(PASSWORD)
                 .build();
 
         webTestClient
@@ -73,14 +85,47 @@ public class MemberControllerTest {
                     .body(Mono.just(member), Member.class)
                 .exchange()
                 .expectStatus()
-                    .isOk()
+                    .isCreated()
                 .expectHeader()
                     .contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                     .jsonPath("id").exists()
-                    .jsonPath("email").isEqualTo(email)
-                    .jsonPath("username").isEqualTo(username)
+                    .jsonPath("email").isEqualTo(EMAIL)
+                    .jsonPath("username").isEqualTo(USERNAME)
         ;
+    }
+
+    @Test
+    @Parameters
+    @Description("회원가입이 실패하는 테스트")
+    public void createMemberFail(String email, String username, String password) {
+        Member member = Member.builder()
+                .email(email)
+                .username(username)
+                .password(password)
+                .build();
+
+        webTestClient
+                .post().uri("/api/members")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(Mono.just(member), Member.class)
+                .exchange()
+                .expectStatus()
+                    .isBadRequest()
+        ;
+    }
+
+    private Object[] parametersForCreateMemberFail() {
+        return new Object[] {
+                new Object[]{"", "", ""}, // email, username, password 입력 x
+                new Object[]{"", USERNAME, PASSWORD}, // email 입력 x
+                new Object[]{EMAIL, "", PASSWORD}, // username 입력 x
+                new Object[]{EMAIL, USERNAME, ""}, // password 입력 x
+                new Object[]{"fail", USERNAME, PASSWORD}, // email 형식 오류
+                new Object[]{EMAIL, "f", PASSWORD}, // username 형식 오류
+                new Object[]{EMAIL, USERNAME, "12345"} // password 형식 오류
+        };
     }
 
     private String getAccessToken() {
