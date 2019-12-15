@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Set;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +18,7 @@ public class ArticleService {
 
     public Mono<Article> create(Article article, Member member) {
         String memberId = member.getId();
+        article.setCreatedAt(LocalDateTime.now());
         article.setMemberId(memberId);
         return articleRepository.save(article);
     }
@@ -53,23 +54,4 @@ public class ArticleService {
         return articleRepository.findById(id).block();
     }
 
-    public Mono<Article> save(Article article) {
-        return articleRepository.save(article);
-    }
-
-    public Article favorite(Article article, String memberId) {
-        article.setFavoritesCount(article.getFavoritesCount() + 1);
-        article.setFavoritedMemberId(Set.of(memberId));
-        if (article.getFavoritedMemberId().contains(memberId)) {
-            article.setFavoritesCount(article.getFavoritesCount() - 1);
-//            article.setFavoritedMemberId(removeSet(article, memberId));
-        }
-        return article;
-    }
-
-//    private Set<String> removeSet(Article article, String memberId) {
-//        if (article.getFavoritedMemberId().remove(memberId))
-//            return article.getFavoritedMemberId();
-//        else return null;
-//    }
 }

@@ -53,16 +53,17 @@ public class ArticleControllerTest {
 
     private final static String BEARER = "BEARER ";
 
-    final String url = "/api/articles";
+    private final String url = "/api/articles";
+
+    private Member member;
 
     @Before
     public void setUp() {
         this.articleRepository.deleteAll();
 
-        Member member = createMember();
+        member = createMember();
         webTestClient.post()
                 .uri("/api/members")
-                .header(HttpHeaders.AUTHORIZATION, getAccessToken())
                 .body(Mono.just(member), Member.class)
                 .exchange()
                 .expectStatus().isOk();
@@ -79,15 +80,6 @@ public class ArticleControllerTest {
                 .image("/url")
                 .favoritesCount(0)
                 .build();
-
-        webTestClient.post()
-                .uri("/api/members")
-                .header(HttpHeaders.AUTHORIZATION, getAccessToken())
-                .body(Mono.just(createMember()), Member.class)
-                .exchange()
-                .expectStatus().isOk();
-        Member member = memberRepository.findByEmail(createMember().getEmail()).block();
-        articleService.create(article, member);
 
         webTestClient.post().uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -118,9 +110,7 @@ public class ArticleControllerTest {
                 .header(HttpHeaders.AUTHORIZATION, getAccessToken())
                 .body(Mono.just(article), Article.class)
                 .exchange()
-                .expectStatus().isBadRequest()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
+                .expectStatus().isBadRequest();
     }
 
     @Test
@@ -135,9 +125,7 @@ public class ArticleControllerTest {
                 .header(HttpHeaders.AUTHORIZATION, getAccessToken())
                 .body(Mono.just(article), Article.class)
                 .exchange()
-                .expectStatus().isBadRequest()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
+                .expectStatus().isBadRequest();
     }
 
 //    @Test
@@ -318,7 +306,7 @@ public class ArticleControllerTest {
                 .header(HttpHeaders.AUTHORIZATION, getAccessToken())
                 .body(Mono.just(article), Article.class)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
@@ -370,7 +358,7 @@ public class ArticleControllerTest {
                 .header(HttpHeaders.AUTHORIZATION, getAccessToken())
                 .body(Mono.just(article), Article.class)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 

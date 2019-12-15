@@ -11,7 +11,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
-import java.util.Collections;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,13 +26,6 @@ public class ArticleController {
         }
         return articleService.create(article, member)
                 .map(saveArticle -> new ResponseEntity<>(saveArticle, HttpStatus.CREATED));
-    }
-
-    @PostMapping("/{id}/favorite")
-    public Mono<Article> favoriteArticle(@PathVariable(value = "id") String id, @CurrentMember String memberId) {
-        Article article = articleService.findArticle(id);
-        articleService.favorite(article, memberId);
-        return articleService.save(article);
     }
 
     @GetMapping
