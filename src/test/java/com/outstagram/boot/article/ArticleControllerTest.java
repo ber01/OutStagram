@@ -55,18 +55,14 @@ public class ArticleControllerTest {
 
     private final String url = "/api/articles";
 
-    private Member member;
+    private Member currentMember;
 
     @Before
     public void setUp() {
+        this.memberRepository.deleteAll();
         this.articleRepository.deleteAll();
 
-        member = createMember();
-        webTestClient.post()
-                .uri("/api/members")
-                .body(Mono.just(member), Member.class)
-                .exchange()
-                .expectStatus().isOk();
+        currentMember = memberRepository.findByEmail("test@email.com").block();
     }
 
     @Test
@@ -273,7 +269,7 @@ public class ArticleControllerTest {
                 .image("/url")
                 .favoritesCount(0)
                 .build();
-        articleService.create(article, createMember());
+        articleService.create(article, currentMember);
 
         webTestClient.get().uri(url + "/" + article.getId())
                 .exchange()
@@ -291,14 +287,6 @@ public class ArticleControllerTest {
                 .image("/url")
                 .favoritesCount(0)
                 .build();
-        Member member = this.createMember();
-
-        webTestClient.post()
-                .uri("/api/members")
-                .header(HttpHeaders.AUTHORIZATION, getAccessToken())
-                .body(Mono.just(member), Member.class)
-                .exchange()
-                .expectStatus().isOk();
 
         webTestClient.post().uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -328,16 +316,6 @@ public class ArticleControllerTest {
         StepVerifier.create(updatedArticleMono)
                 .assertNext(i -> assertThat(i.getTitle()).isEqualTo(updatedTitle))
                 .verifyComplete();
-    }
-
-    private Member createMember() {
-        return Member.builder()
-                .email("test@email.com")
-                .username("testuser")
-                .password("pass")
-                .createdAt(LocalDateTime.now())
-                .roles(Set.of(MemberRole.ADMIN, MemberRole.USER))
-                .build();
     }
 
     @Test
