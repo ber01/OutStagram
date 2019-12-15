@@ -1,5 +1,7 @@
 package com.outstagram.boot.common;
 
+import com.outstagram.boot.article.Article;
+import com.outstagram.boot.article.ArticleRepository;
 import com.outstagram.boot.member.Member;
 import com.outstagram.boot.member.MemberRepository;
 import com.outstagram.boot.member.MemberRole;
@@ -11,6 +13,7 @@ import reactor.core.publisher.Flux;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class DummyData implements CommandLineRunner {
     private final MemberRepository memberRepository;
     private final MemberService memberService;
     private final AppProperties appProperties;
+    private final ArticleRepository articleRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -55,6 +59,33 @@ public class DummyData implements CommandLineRunner {
                                         .roles(Set.of(MemberRole.ADMIN, MemberRole.USER))
                                         .build()
                         ).flatMap(memberService::saveMember)
+                ).subscribe(System.out::println);
+
+        articleRepository.deleteAll()
+                .thenMany(
+                        Flux.just(
+                                 Article.builder()
+                                        .title("test")
+                                        .description("It is test")
+                                        .createdAt(LocalDateTime.now())
+                                        .image("/url")
+                                        .favoritesCount(0)
+                                        .build(),
+                                Article.builder()
+                                        .title("test2")
+                                        .description("It is test")
+                                        .createdAt(LocalDateTime.now())
+                                        .image("/url")
+                                        .favoritesCount(0)
+                                        .build(),
+                                Article.builder()
+                                        .title("test3")
+                                        .description("It is test")
+                                        .createdAt(LocalDateTime.now())
+                                        .image("/url")
+                                        .favoritesCount(0)
+                                        .build()
+                        ).flatMap(articleRepository::save)
                 ).subscribe(System.out::println);
     }
 }

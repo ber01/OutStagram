@@ -1,7 +1,6 @@
 package com.outstagram.boot.article;
 
 import com.outstagram.boot.member.Member;
-import com.outstagram.boot.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +8,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDateTime;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -17,9 +16,8 @@ public class ArticleService {
 
     private final ArticleRepository articleRepository;
 
-    private final MemberRepository memberRepository;
-
-    public Mono<Article> create(Article article, String memberId) {
+    public Mono<Article> create(Article article, Member member) {
+        String memberId = member.getId();
         article.setMemberId(memberId);
         return articleRepository.save(article);
     }
@@ -54,4 +52,24 @@ public class ArticleService {
     public Article findArticle(String id) {
         return articleRepository.findById(id).block();
     }
+
+    public Mono<Article> save(Article article) {
+        return articleRepository.save(article);
+    }
+
+    public Article favorite(Article article, String memberId) {
+        article.setFavoritesCount(article.getFavoritesCount() + 1);
+        article.setFavoritedMemberId(Set.of(memberId));
+        if (article.getFavoritedMemberId().contains(memberId)) {
+            article.setFavoritesCount(article.getFavoritesCount() - 1);
+//            article.setFavoritedMemberId(removeSet(article, memberId));
+        }
+        return article;
+    }
+
+//    private Set<String> removeSet(Article article, String memberId) {
+//        if (article.getFavoritedMemberId().remove(memberId))
+//            return article.getFavoritedMemberId();
+//        else return null;
+//    }
 }

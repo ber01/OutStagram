@@ -1,6 +1,5 @@
 package com.outstagram.boot.article;
 
-import com.outstagram.boot.member.Member;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
