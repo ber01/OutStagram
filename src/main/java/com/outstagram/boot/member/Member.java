@@ -40,4 +40,6 @@ public class Member {
 
     private Set<MemberRole> roles;
 
+    private String accessToken;
+
 }
