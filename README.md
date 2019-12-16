@@ -1,5 +1,5 @@
 # OutStagram
-- 비동기 REST-API 프로젝트
+- `Spring Web-Flux`를 이용한 `REST-API SNS` 서버를 만드는 저장소입니다. 
 
 ## 준비사항
 - `jdk` (>=11)
