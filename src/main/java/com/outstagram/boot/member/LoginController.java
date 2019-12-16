@@ -44,7 +44,7 @@ public class LoginController {
             boolean compare = passwordEncoder.matches(password, checkPwd);
 
             if (compare) {
-                checkMember.setAccessToken(getAccessToken(checkMember));
+                // checkMember.setAccessToken(getAccessToken(checkMember));
                 return Mono.just(new ResponseEntity<>(checkMember, HttpStatus.OK));
             } else {
                 return Mono.just(new ResponseEntity<>(null, HttpStatus.BAD_REQUEST));
@@ -52,6 +52,7 @@ public class LoginController {
         }
     }
 
+    /*
     private String getAccessToken(Member checkMember) {
         WebClient webClient = WebClient.builder()
                 .baseUrl("http://localhost:8080")
@@ -70,7 +71,7 @@ public class LoginController {
                 .subscribe(System.out::println)
         ;
 
-        /*
+
         System.out.println(result);
 
         String resultS = result.toString();
@@ -80,9 +81,9 @@ public class LoginController {
 
         Jackson2JsonParser parser = new Jackson2JsonParser();
         return BEARER + parser.parseMap(content).get("access_token").toString();
-        */
+
 
         return null;
     }
-
+    */
 }
