@@ -2,6 +2,7 @@ package com.outstagram.boot.article;
 
 import com.outstagram.boot.common.AppProperties;
 import com.outstagram.boot.member.Member;
+import com.outstagram.boot.member.MemberRepository;
 import com.outstagram.boot.member.MemberRole;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +43,9 @@ public class ArticleControllerTest {
     ArticleRepository articleRepository;
 
     @Autowired
+    MemberRepository memberRepository;
+
+    @Autowired
     ArticleService articleService;
 
     @Autowired
@@ -49,19 +53,16 @@ public class ArticleControllerTest {
 
     private final static String BEARER = "BEARER ";
 
-    final String url = "/api/articles";
+    private final String url = "/api/articles";
+
+    private Member currentMember;
 
     @Before
     public void setUp() {
+        this.memberRepository.deleteAll();
         this.articleRepository.deleteAll();
 
-        Member member = createMember();
-        webTestClient.post()
-                .uri("/api/members")
-                .header(HttpHeaders.AUTHORIZATION, getAccessToken())
-                .body(Mono.just(member), Member.class)
-                .exchange()
-                .expectStatus().isOk();
+        currentMember = memberRepository.findByEmail("test@email.com").block();
     }
 
     @Test
@@ -75,15 +76,6 @@ public class ArticleControllerTest {
                 .image("/url")
                 .favoritesCount(0)
                 .build();
-
-        Member member = createMember();
-        webTestClient.post()
-                .uri("/api/members")
-                .header(HttpHeaders.AUTHORIZATION, getAccessToken())
-                .body(Mono.just(member), Member.class)
-                .exchange()
-                .expectStatus().isOk();
-        article.setMemberId(member.getId());
 
         webTestClient.post().uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -114,9 +106,7 @@ public class ArticleControllerTest {
                 .header(HttpHeaders.AUTHORIZATION, getAccessToken())
                 .body(Mono.just(article), Article.class)
                 .exchange()
-                .expectStatus().isBadRequest()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
+                .expectStatus().isBadRequest();
     }
 
     @Test
@@ -131,10 +121,124 @@ public class ArticleControllerTest {
                 .header(HttpHeaders.AUTHORIZATION, getAccessToken())
                 .body(Mono.just(article), Article.class)
                 .exchange()
-                .expectStatus().isBadRequest()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
+                .expectStatus().isBadRequest();
     }
+
+//    @Test
+//    @Description("좋아요 기능을 누른 경우")
+//    public void favoriteArticle() {
+//        Article article = Article.builder()
+//                .id(UUID.randomUUID().toString())
+//                .title("test")
+//                .description("It is test")
+//                .createdAt(LocalDateTime.now())
+//                .image("/url")
+//                .favoritesCount(0)
+//                .build();
+//
+//        webTestClient.post()
+//                .uri("/api/members")
+//                .header(HttpHeaders.AUTHORIZATION, getAccessToken())
+//                .body(Mono.just(createMember()), Member.class)
+//                .exchange()
+//                .expectStatus().isOk();
+//        Member member = memberRepository.findByEmail(createMember().getEmail()).block();
+//        articleService.create(article, member.getId());
+//
+//        webTestClient.post().uri(url)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .header(HttpHeaders.AUTHORIZATION, getAccessToken())
+//                .body(Mono.just(article), Article.class)
+//                .exchange()
+//                .expectStatus().isCreated()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody()
+//                .jsonPath("$.id").isNotEmpty();
+//
+//
+//        webTestClient.post().uri(url + "/" + article.getId() + "/favorite")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .header(HttpHeaders.AUTHORIZATION, getAccessToken())
+//                .body(Mono.just(article), Article.class)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectBody()
+//                .jsonPath("favoritesCount").exists()
+//                .jsonPath("favoritedMemberId").exists();
+//        articleService.favorite(article, article.getMemberId());
+//
+//        Mono<Article> articleMono = articleRepository.findById(article.getId());
+//
+//        StepVerifier.create(articleMono)
+//                .assertNext(art -> {
+//                    art.getFavoritesCount().equals(1);
+//                    art.getFavoritedMemberId().contains(member.getId());
+//                })
+//                .verifyComplete();
+//    }
+//
+//    @Test
+//    @Description("좋아요 기능을 두 번 누른 경우")
+//    public void double_Click_Favorite_Article() {
+//        Article article = Article.builder()
+//                .id(UUID.randomUUID().toString())
+//                .title("test")
+//                .description("It is test")
+//                .createdAt(LocalDateTime.now())
+//                .image("/url")
+//                .favoritesCount(0)
+//                .build();
+//
+//        webTestClient.post()
+//                .uri("/api/members")
+//                .header(HttpHeaders.AUTHORIZATION, getAccessToken())
+//                .body(Mono.just(createMember()), Member.class)
+//                .exchange()
+//                .expectStatus().isOk();
+//        Member member = memberRepository.findByEmail(createMember().getEmail()).block();
+//        articleService.create(article, member.getId());
+//
+//        webTestClient.post().uri(url)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .header(HttpHeaders.AUTHORIZATION, getAccessToken())
+//                .body(Mono.just(article), Article.class)
+//                .exchange()
+//                .expectStatus().isCreated()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody()
+//                .jsonPath("$.id").isNotEmpty();
+//
+//        webTestClient.post().uri(url + "/" + article.getId() + "/favorite")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .header(HttpHeaders.AUTHORIZATION, getAccessToken())
+//                .body(Mono.just(article), Article.class)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectBody()
+//                .jsonPath("favoritesCount").exists()
+//                .jsonPath("favoritedMemberId").exists();
+//
+//        webTestClient.post().uri(url + "/" + article.getId() + "/favorite")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .header(HttpHeaders.AUTHORIZATION, getAccessToken())
+//                .body(Mono.just(article), Article.class)
+//                .exchange()
+//                .expectStatus().isOk();
+//
+//        Mono<Article> articleMono = articleRepository.findById(article.getId());
+//
+//        StepVerifier.create(articleMono)
+//                .assertNext(art -> {
+//                    art.getFavoritesCount().equals(0);
+//                    art.getFavoritedMemberId().isEmpty();
+//                })
+//                .verifyComplete();
+//    }
 
     @Test
     @Description("정상적으로 모든 게시물들을 보여주는 테스트")
@@ -165,8 +269,7 @@ public class ArticleControllerTest {
                 .image("/url")
                 .favoritesCount(0)
                 .build();
-        String memberId = createMember().getId();
-        articleService.create(article, memberId);
+        articleService.create(article, currentMember);
 
         webTestClient.get().uri(url + "/" + article.getId())
                 .exchange()
@@ -184,14 +287,6 @@ public class ArticleControllerTest {
                 .image("/url")
                 .favoritesCount(0)
                 .build();
-        Member member = this.createMember();
-
-        webTestClient.post()
-                .uri("/api/members")
-                .header(HttpHeaders.AUTHORIZATION, getAccessToken())
-                .body(Mono.just(member), Member.class)
-                .exchange()
-                .expectStatus().isOk();
 
         webTestClient.post().uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -199,7 +294,7 @@ public class ArticleControllerTest {
                 .header(HttpHeaders.AUTHORIZATION, getAccessToken())
                 .body(Mono.just(article), Article.class)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
@@ -223,16 +318,6 @@ public class ArticleControllerTest {
                 .verifyComplete();
     }
 
-    private Member createMember() {
-        return Member.builder()
-                .email("test@email.com")
-                .username("testuser")
-                .password("pass")
-                .createdAt(LocalDateTime.now())
-                .roles(Set.of(MemberRole.ADMIN, MemberRole.USER))
-                .build();
-    }
-
     @Test
     @Description("정상적으로 게시물을 삭제하는 테스트")
     public void deleteArticle() {
@@ -251,7 +336,7 @@ public class ArticleControllerTest {
                 .header(HttpHeaders.AUTHORIZATION, getAccessToken())
                 .body(Mono.just(article), Article.class)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
