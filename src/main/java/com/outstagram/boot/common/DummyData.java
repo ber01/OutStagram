@@ -13,6 +13,7 @@ import reactor.core.publisher.Flux;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -31,21 +32,21 @@ public class DummyData implements CommandLineRunner {
                                 Member.builder()
                                         .email("test@email.com")
                                         .username("testuser")
-                                        .password("pass")
+                                        .password("abcd1234!")
                                         .createdAt(LocalDateTime.now())
                                         .roles(Set.of(MemberRole.ADMIN, MemberRole.USER))
                                         .build(),
                                 Member.builder()
                                         .email("test2@email.com")
                                         .username("testuser2")
-                                        .password("pass")
+                                        .password("abcd1234@")
                                         .createdAt(LocalDateTime.now())
                                         .roles(Set.of(MemberRole.USER))
                                         .build(),
                                 Member.builder()
                                         .email("test3@email.com")
                                         .username("testuser3")
-                                        .password("pass")
+                                        .password("abcd1234#")
                                         .createdAt(LocalDateTime.now())
                                         .roles(Set.of(MemberRole.ADMIN))
                                         .build(),
@@ -59,10 +60,11 @@ public class DummyData implements CommandLineRunner {
                                         .build()
                         ).flatMap(memberService::saveMember)
                 ).subscribe(System.out::println);
+
         articleRepository.deleteAll()
                 .thenMany(
                         Flux.just(
-                                 Article.builder()
+                                Article.builder()
                                         .title("test")
                                         .description("It is test")
                                         .createdAt(LocalDateTime.now())

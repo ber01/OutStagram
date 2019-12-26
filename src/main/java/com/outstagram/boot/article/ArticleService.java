@@ -1,7 +1,6 @@
 package com.outstagram.boot.article;
 
 import com.outstagram.boot.member.Member;
-import com.outstagram.boot.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +16,9 @@ public class ArticleService {
 
     private final ArticleRepository articleRepository;
 
-    private final MemberRepository memberRepository;
-
-    public Mono<Article> create(Article article, String memberId) {
+    public Mono<Article> create(Article article, Member member) {
+        String memberId = member.getId();
+        article.setCreatedAt(LocalDateTime.now());
         article.setMemberId(memberId);
         return articleRepository.save(article);
     }
@@ -50,4 +49,8 @@ public class ArticleService {
                 )
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+    public Article findArticle(String id) {
+        return articleRepository.findById(id).block();
+    }
+
 }

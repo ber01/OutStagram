@@ -1,11 +1,13 @@
 package com.outstagram.boot.member;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
@@ -13,6 +15,7 @@ import reactor.core.publisher.Flux;
 public class MemberController {
 
     private final MemberRepository memberRepository;
+    private final MemberService memberService;
 
     @GetMapping
     public Flux<Member> getMembers(@CurrentMember Member member) {
@@ -23,8 +26,13 @@ public class MemberController {
     }
 
     @PostMapping
-    public void testMember() {
-        System.out.println("테스트용");
-    }
+    public Mono<ResponseEntity<Member>> save(@RequestBody @Valid Member member) {
+        Mono<Member> byEmail = memberRepository.findByEmail(member.getEmail());
+        if (byEmail.block() != null) {
+            return Mono.just(new ResponseEntity<>(null, HttpStatus.BAD_REQUEST));
+        }
 
+        return memberService.save(member)
+                .map(saveMember -> new ResponseEntity<>(saveMember, HttpStatus.CREATED));
+    }
 }
